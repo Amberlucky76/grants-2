@@ -650,7 +650,11 @@ async function fetchGrants() {
 
     if (data.errorcode !== 0) throw new Error(data.msg || 'API error');
 
-    state.grants = data.data.oppHits || [];
+    let grants = data.data.oppHits || [];
+    if (state.eligibility === '01|02|04|08') {
+      grants = filterLocalGov(grants);
+    }
+    state.grants = grants;
     state.totalHits = data.data.hitCount || 0;
     state.loading = false;
 
@@ -662,6 +666,33 @@ async function fetchGrants() {
     state.loading = false;
     showError(err.message);
   }
+}
+
+// ── LOCAL GOV FILTER ──────────────────────────────────────────
+// Agencies that primarily fund local governments
+const LOCAL_GOV_AGENCIES = [
+  "HUD","DOT","FHWA","FTA","EPA","FEMA","DHS","EDA","DOC","USDA","RD",
+  "DOJ","BJA","COPS","OJP","OVC","HHS","CDC","SAMHSA","ACF","HRSA",
+  "DOE","ED","NEA","NEH","DOI","NPS","BLM","USFWS","USACE","SBA",
+  "CNCS","AmeriCorps","IMLS","DOL","ETA","VISTA","HHS-ACF","CDBG",
+  "USDA-RD","ARC","DRA","NRCS","FSA"
+];
+
+// Agency codes that are NOT typically for local govts
+const NON_LOCAL_AGENCIES = [
+  "DOS","NASA","NIH","NSF","AFOSR","ONR","ARO","DARPA","DOD","AF",
+  "NAVY","ARMY","DTRA","DIA","NRO","AFRL","NIST","NOAA","DOE-SC",
+  "NCI","NHLBI","NIMH","NIAID","NEI","NIA","NICHD","NIDDK","NIGMS"
+];
+
+function filterLocalGov(grants) {
+  return grants.filter(g => {
+    const code = (g.agencyCode || '').toUpperCase();
+    const root = code.split('-')[0];
+    // Exclude if it's a clearly non-local agency
+    if (NON_LOCAL_AGENCIES.some(a => code.startsWith(a) || root === a)) return false;
+    return true;
+  });
 }
 
 // ── RENDER GRANTS ──────────────────────────────────────────────
