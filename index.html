@@ -529,22 +529,17 @@
     <div class="filter-group">
       <h4>Eligibility</h4>
       <select class="select-filter" id="filter-eligibility">
-        <option value="">Any</option>
+        <option value="01|02|04|08" selected>Local government (all)</option>
+        <option value="">Any / unrestricted</option>
         <option value="00">State governments</option>
         <option value="01">County governments</option>
         <option value="02">City or township governments</option>
         <option value="04">Special district governments</option>
         <option value="05">Independent school districts</option>
-        <option value="06">Public & state universities</option>
+        <option value="06">Public &amp; state universities</option>
         <option value="07">Native American tribal govts</option>
         <option value="08">Public housing authorities</option>
-        <option value="11">Hispanic-serving institutions</option>
-        <option value="12">Historically Black colleges</option>
-        <option value="20">Private institutions of higher ed</option>
-        <option value="21">Individuals</option>
         <option value="22">Nonprofits (501c3)</option>
-        <option value="23">Nonprofits (non-501c3)</option>
-        <option value="25">For-profit orgs</option>
         <option value="99">Unrestricted</option>
       </select>
     </div>
@@ -601,7 +596,7 @@ const PAGE_SIZE = 12;
 let state = {
   keyword: '',
   category: '',
-  eligibility: '',
+  eligibility: '01|02|04|08',
   statuses: ['posted'],
   sort: 'openDate|desc',
   page: 0,
@@ -946,7 +941,8 @@ function renderActiveTags() {
   const tags = [];
   if (state.keyword) tags.push(`keyword: "${state.keyword}"`);
   if (state.category) tags.push(`category: ${CAT_LABELS[state.category] || state.category}`);
-  if (state.eligibility) tags.push('eligibility filter');
+  const eligLabels = {'01|02|04|08':'Local government','00':'State govts','01':'County govts','02':'City govts','04':'Special districts','05':'School districts','06':'Public universities','07':'Tribal govts','08':'Housing authorities','22':'Nonprofits','99':'Unrestricted'};
+  if (state.eligibility) tags.push('eligibility: ' + (eligLabels[state.eligibility] || state.eligibility));
   el.innerHTML = tags.map(t => `<span class="active-tag">${t}</span>`).join('') + ' ';
 }
 
